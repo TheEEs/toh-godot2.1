@@ -1,0 +1,267 @@
+[gd_scene load_steps=7 format=1]
+
+[ext_resource path="res://Tower-of-Hanoi.png" type="Texture" id=1]
+
+[sub_resource type="GDScript" id=1]
+
+script/source = "extends CanvasLayer
+
+var nopl
+var df_col
+var tg_col
+func _ready():
+	var x = get_transform()
+	x[2] = Vector2(OS.get_window_size().width / 2,200)
+	set_transform(x)
+	get_tree().get_root().set_transparent_background(true)
+	pass
+"
+
+[sub_resource type="GDScript" id=2]
+
+script/source = "extends HSlider
+onready var noc_label = get_parent().get_node(\"noc\")
+onready var root = get_parent()
+func _ready():
+	root.nopl = int(self.get_value())
+	noc_label.set_text(str(root.nopl))
+	pass
+
+
+func _on_HSlider_value_changed(value):
+	root.nopl = int(value)
+	noc_label.set_text(str(root.nopl))
+"
+
+[sub_resource type="GDScript" id=3]
+
+script/source = "extends Button
+
+onready var root = get_parent()
+onready var GameScene = load('res://Game.tscn')
+func _ready():
+	pass
+
+func _on_Button_pressed():
+	single_ton.nopl = root.nopl
+	single_ton.default_col  = root.df_col
+	single_ton.winning_the_game = false
+	single_ton.target_col = root.tg_col
+	single_ton._move_time = 0
+	single_ton.resolver = single_ton.AI.Resolver.new(root.nopl,single_ton.translate_number_to_disk_name(root.df_col),
+		single_ton.translate_number_to_disk_name(root.tg_col))
+	get_tree().change_scene_to(GameScene)
+	pass"
+
+[sub_resource type="GDScript" id=4]
+
+script/source = "extends OptionButton
+
+onready var root = get_parent()
+func _ready():
+	root.tg_col = 2
+	self.add_item(\"B\")
+	self.add_item(\"C\")
+
+
+
+func _on_target_op_button_item_selected( ID ):
+	var label = get_item_text(get_selected())
+	if label == \"A\":
+		root.tg_col = 1
+	elif label == \"B\":
+		root.tg_col = 2
+	elif label == \"C\":
+		root.tg_col = 3
+"
+
+[sub_resource type="GDScript" id=5]
+
+script/source = "extends OptionButton
+
+onready var root=get_parent()
+onready var target_button = get_parent().get_node(\"target_op_button\")
+func _ready():
+	self.add_item(\"A\")
+	self.add_item(\"B\")
+	self.add_item(\"C\")
+	root.df_col = 1
+
+
+
+func _on_OptionButton_item_selected( ID ):
+	root.df_col = ID +1 
+	target_button.clear()
+	if ID == 0:
+		root.tg_col = 2
+		target_button.add_item(\"B\")
+		target_button.add_item(\"C\")
+	elif ID == 1:
+		root.tg_col = 1
+		target_button.add_item(\"A\")
+		target_button.add_item(\"C\")
+	elif ID == 2:
+		root.tg_col = 1
+		target_button.add_item(\"A\")
+		target_button.add_item(\"B\")
+"
+
+[node name="ControlLayer" type="CanvasLayer"]
+
+layer = 2
+offset = Vector2( 0, 0 )
+rotation = 0.0
+scale = Vector2( 1, 1 )
+script/script = SubResource( 1 )
+
+[node name="Logo" type="Sprite" parent="."]
+
+texture = ExtResource( 1 )
+
+[node name="Label" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = -177.0
+margin/top = 143.0
+margin/right = -50.0
+margin/bottom = 157.0
+text = "Number of platters"
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="noc" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = -48.0
+margin/top = 143.0
+margin/right = -8.0
+margin/bottom = 157.0
+text = "3"
+align = 1
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="HSlider" type="HSlider" parent="."]
+
+focus/ignore_mouse = false
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = -1.0
+margin/top = 141.0
+margin/right = 180.0
+margin/bottom = 157.0
+range/min = 3.0
+range/max = 8.0
+range/step = 1.0
+range/page = 0.0
+range/value = 5.0
+range/exp_edit = false
+range/rounded = false
+tick_count = 0
+ticks_on_borders = false
+focus_mode = 2
+script/script = SubResource( 2 )
+
+[node name="Label 2" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = -155.0
+margin/top = 172.0
+margin/right = -56.0
+margin/bottom = 186.0
+text = "Default Column"
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[node name="Button" type="Button" parent="."]
+
+focus/ignore_mouse = false
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = -46.0
+margin/top = 268.0
+margin/right = 43.0
+margin/bottom = 305.0
+toggle_mode = false
+enabled_focus_mode = 2
+shortcut = null
+text = "Play"
+flat = false
+script/script = SubResource( 3 )
+
+[node name="target_op_button" type="OptionButton" parent="."]
+
+focus/ignore_mouse = false
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = -37.0
+margin/top = 201.0
+margin/right = 43.0
+margin/bottom = 221.0
+toggle_mode = false
+enabled_focus_mode = 2
+shortcut = null
+flat = false
+align = 0
+selected = -1
+items = [  ]
+script/script = SubResource( 4 )
+
+[node name="OptionButton" type="OptionButton" parent="."]
+
+focus/ignore_mouse = false
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 2
+margin/left = -36.0
+margin/top = 168.0
+margin/right = 43.0
+margin/bottom = 188.0
+toggle_mode = false
+enabled_focus_mode = 2
+shortcut = null
+flat = false
+align = 0
+selected = -1
+items = [  ]
+script/script = SubResource( 5 )
+
+[node name="Label 3" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = -148.0
+margin/top = 207.0
+margin/right = -56.0
+margin/bottom = 221.0
+text = "Target Column"
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+[connection signal="value_changed" from="HSlider" to="HSlider" method="_on_HSlider_value_changed"]
+
+[connection signal="pressed" from="Button" to="Button" method="_on_Button_pressed"]
+
+[connection signal="item_selected" from="target_op_button" to="target_op_button" method="_on_target_op_button_item_selected"]
+
+[connection signal="item_selected" from="OptionButton" to="OptionButton" method="_on_OptionButton_item_selected"]
+
+

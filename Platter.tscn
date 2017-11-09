@@ -1,0 +1,89 @@
+[gd_scene load_steps=2 format=1]
+
+[sub_resource type="GDScript" id=1]
+
+script/source = "extends Node2D
+
+const MIN_WIDTH = 16
+const COLOR = [
+	[Color(\"#e74c3c\"),Color(\"#c0392b\")], #Alizarin
+	[Color(\"#e67e22\"),Color(\"#d35400\")], #Carrot
+	[Color(\"#f1c40f\"),Color(\"#f39c12\")], #Sun Flower
+	[Color(\"#1abc9c\"),Color(\"#16a085\")], #Turqouise
+	[Color(\"#2ecc71\"),Color(\"#27ae60\")], #Emerald
+	[Color(\"#3498db\"),Color(\"#2980b9\")], #Peter river
+	[Color(\"#95a5a6\"),Color(\"#7f8c8d\")], #Concrete
+	[Color(\"#ecf0f1\"),Color(\"#bdc3c7\")], #Clouds
+	[Color(\"#34495e\"),Color(\"#2c3e50\")], #Wet asphalt
+	[Color(\"#9b59b6\"),Color(\"#8e44ad\")], #Wisteria
+]
+var my_rect
+var current_location
+export var level = 1
+export(int) var width = 50
+export(int) var height = 30
+signal mouse_down
+signal mouse_drop
+signal hover
+var draggable = false
+var hovered=true
+var current_column
+onready  var win_label = get_tree().get_root().get_node(\"Game\").get_node('rplay').get_node(\"You-Win\")
+onready  var replay_button = get_tree().get_root().get_node(\"Game\").get_node('rplay').get_node(\"replay-button\")
+onready var move_time_label = get_tree().get_root().get_node(\"Game\").get_node('rplay').get_node('move-time-label')
+func _ready():
+	current_column = get_parent()
+	self.width = level * width
+	my_rect = Rect2(- self.width / 2, -self.height / 2,self.width,self.height)
+	set_process_input(true)
+	set_process(true)
+	
+func _process(delta):
+	var local_mp = self.get_local_mouse_pos()
+	if local_mp.x >= -self.width/2 and local_mp.x <= self.width/2 \\
+		and local_mp.y >= - self.height/2 and local_mp.y <= self.height/2:
+		hovered=true
+	else:
+		hovered=false
+	update()
+	
+func _input(event):
+	if not single_ton.winning_the_game:
+		if event.type == InputEvent.MOUSE_BUTTON and Input.is_mouse_button_pressed(BUTTON_LEFT):
+			if my_rect.has_point(get_local_mouse_pos()):
+				draggable = true
+		elif event.type == InputEvent.MOUSE_MOTION and Input.is_mouse_button_pressed(BUTTON_LEFT):
+			if current_column.can_be_drag(self.level) and draggable:
+				var current_position = self.get_pos()
+				var current_mouse_post = get_local_mouse_pos()
+				set_pos(current_position + current_mouse_post)
+		elif event.type == InputEvent.MOUSE_BUTTON:
+			if draggable and current_column.can_be_drag(self.level):
+				var target_column_index = clamp(single_ton._is_in_column(get_global_mouse_pos().x),0,2)
+				if single_ton.columns[target_column_index].push_platter(self): #if this platter can be successfully pushed onto the target tower.
+					single_ton.resolver.disks[self.level -1].belongs_to = \\
+						single_ton.translate_number_to_disk_name(target_column_index + 1)
+					current_column.pop_platter()
+					single_ton._move_time += 1
+					move_time_label.set_text(str(single_ton._move_time))
+					if single_ton.columns[target_column_index].number_of_platters == single_ton.nopl and \\
+						target_column_index+1 == single_ton.target_col:
+							single_ton.winning_the_game = true
+							win_label.show()
+							replay_button.show()
+							
+				else:
+					set_pos(current_location)
+			draggable = false
+func _draw():
+	draw_rect(my_rect, self.COLOR[level -1][1 if hovered else 0])
+"
+
+[node name="Platter" type="Node2D"]
+
+script/script = SubResource( 1 )
+level = 1
+width = 50
+height = 30
+
+

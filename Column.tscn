@@ -1,0 +1,57 @@
+[gd_scene load_steps=2 format=1]
+
+[sub_resource type="GDScript" id=1]
+
+script/source = "extends Node2D
+var stack= []
+export(int,0,10) var number_of_platters
+var height=0
+onready var platter = preload(\"res://Platter.tscn\")
+func _ready():
+	single_ton._add_columns(self)
+	for i in range(self.number_of_platters):
+		var pl = platter.instance()
+		pl.level = number_of_platters - i
+		stack.push_front(pl)
+		height -= pl.height + 6
+		var position = Vector2(0,height)
+		pl.current_location = position
+		pl.set_pos(position)
+		add_child(pl)
+		
+	
+func _process(delta):
+	pass
+func can_be_drag(level):
+	return level == stack[0].level
+func pop_platter():
+	if stack.size() > 0:
+		var pop_plt = stack[0]
+		stack.pop_front()
+		height += pop_plt.height + 6
+		remove_child(pop_plt)
+		self.number_of_platters -= 1
+func push_platter(plt):
+	if (not self.stack.size()) or plt.level < self.stack[0].level:
+		var new_platter= platter.instance()
+		new_platter.level= plt.level
+		self.stack.push_front(new_platter)
+		height -= new_platter.height + 6
+		var position = Vector2(0,height)
+		new_platter.current_location= position
+		new_platter.set_pos(position)
+		self.add_child(new_platter)
+		self.number_of_platters += 1
+		return true
+	return false
+	"
+
+[node name="Column" type="Node2D"]
+
+script/script = SubResource( 1 )
+__meta__ = {
+"_edit_group_": true
+}
+number_of_platters = 0
+
+
