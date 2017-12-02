@@ -28,9 +28,10 @@ signal hover
 var draggable = false
 var hovered=true
 var current_column
-onready  var win_label = get_tree().get_root().get_node(\"Game\").get_node('rplay').get_node(\"You-Win\")
-onready  var replay_button = get_tree().get_root().get_node(\"Game\").get_node('rplay').get_node(\"replay-button\")
+onready var win_label = get_tree().get_root().get_node(\"Game\").get_node('rplay').get_node(\"You-Win\")
+onready var replay_button = get_tree().get_root().get_node(\"Game\").get_node('rplay').get_node(\"replay-button\")
 onready var move_time_label = get_tree().get_root().get_node(\"Game\").get_node('rplay').get_node('move-time-label')
+onready var hint_button = get_tree().get_root().get_node(\"Game\").get_node(\"./rplay/help-button\")
 func _ready():
 	current_column = get_parent()
 	self.width = level * width
@@ -71,7 +72,7 @@ func _input(event):
 							single_ton.winning_the_game = true
 							win_label.show()
 							replay_button.show()
-							
+							hint_button.queue_free()
 				else:
 					set_pos(current_location)
 			draggable = false
